@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#e65100">
+
+  <title>Oktoberfest Kitchen QR Scanner</title>
+
+  <!-- QR SCANNER -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f5f7;
+      color: #1f2937;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select {
+      font-family: inherit;
+    }
+
+    /* ===========================
+       HEADER
+    =========================== */
+
+    .header {
+      background: linear-gradient(135deg, #b9380a, #f57c00);
+      color: white;
+      padding: 22px 16px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, .18);
+    }
+
+    .header-inner {
+      max-width: 760px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .header-icon {
+      font-size: 42px;
+      margin-bottom: 6px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 27px;
+    }
+
+    .header p {
+      margin: 7px 0 0;
+      opacity: .92;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    /* ===========================
+       MAIN
+    =========================== */
+
+    .container {
+      max-width: 760px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+    }
+
+    .card-title {
+      color: #bf360c;
+      font-size: 19px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .description {
+      margin: 0 0 15px;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    /* ===========================
+       STATUS
+    =========================== */
+
+    .status {
+      padding: 13px;
+      margin-bottom: 14px;
+      border-radius: 9px;
+      background: #f3f4f6;
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .status.success {
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+
+    .status.error {
+      background: #ffebee;
+      color: #b71c1c;
+    }
+
+    .status.warning {
+      background: #fff8e1;
+      color: #e65100;
+    }
+
+    /* ===========================
+       CAMERA
+    =========================== */
+
+    #readerContainer {
+      display: none;
+      margin-top: 14px;
+      padding: 9px;
+      border-radius: 12px;
+      background: #111827;
+    }
+
+    #reader {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 9px;
+      background: black;
+    }
+
+    #reader video {
+      width: 100% !important;
+      border-radius: 8px;
+    }
+
+    .scanner-help {
+      color: white;
+      text-align: center;
+      padding: 10px 5px 4px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* ===========================
+       FORM
+    =========================== */
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    select,
+    input {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 9px;
+      background: white;
+      font-size: 16px;
+    }
+
+    select:focus,
+    input:focus {
+      outline: none;
+      border-color: #ef6c00;
+      box-shadow: 0 0 0 3px rgba(239, 108, 0, .12);
+    }
+
+    .camera-select {
+      display: none;
+      margin-bottom: 12px;
+    }
+
+    /* ===========================
+       BUTTONS
+    =========================== */
+
+    .button {
+      width: 100%;
+      min-height: 52px;
+      border: none;
+      border-radius: 9px;
+      padding: 12px 15px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .button-primary {
+      background: #ef6c00;
+      color: white;
+    }
+
+    .button-primary:hover {
+      background: #e65100;
+    }
+
+    .button-danger {
+      display: none;
+      margin-top: 9px;
+      background: #b71c1c;
+      color: white;
+    }
+
+    .button-secondary {
+      background: #374151;
+      color: white;
+    }
+
+    .button-green {
+      background: #2e7d32;
+      color: white;
+    }
+
+    .button-green:hover {
+      background: #1b5e20;
+    }
+
+    /* ===========================
+       MANUAL
+    =========================== */
+
+    .manual-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    .manual-button {
+      min-width: 120px;
+      border: none;
+      border-radius: 9px;
+      background: #374151;
+      color: white;
+      padding: 0 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* ===========================
+       LAST SCAN
+    =========================== */
+
+    .last-scan {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #e8f5e9;
+      border-left: 5px solid #2e7d32;
+    }
+
+    .last-scan-title {
+      color: #1b5e20;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .last-scan-value {
+      font-weight: bold;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    /* ===========================
+       LOADING
+    =========================== */
+
+    .loading {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(255, 255, 255, .92);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .loading.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 52px;
+      height: 52px;
+      border: 5px solid #ddd;
+      border-top-color: #ef6c00;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    .loading-text {
+      margin-top: 13px;
+      font-weight: bold;
+      color: #374151;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ===========================
+       FOOTER
+    =========================== */
+
+    .footer {
+      text-align: center;
+      padding: 5px 10px 25px;
+      color: #9ca3af;
+      font-size: 12px;
+    }
+
+    /* ===========================
+       MOBILE
+    =========================== */
+
+    @media (max-width: 520px) {
+      .container {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 15px;
+      }
+
+      .header {
+        padding: 18px 12px;
+      }
+
+      .header h1 {
+        font-size: 22px;
+      }
+
+      .header-icon {
+        font-size: 35px;
+      }
+
+      .manual-row {
+        grid-template-columns: 1fr;
+      }
+
+      .manual-button {
+        min-height: 47px;
+      }
+    }
+  </style>
+</head>
+
+
+<body>
+
+  <!-- ===========================
+       LOADING
+  ============================ -->
+
+  <div
+    class="loading"
+    id="loading"
+  >
+
+    <div class="spinner"></div>
+
+    <div
+      class="loading-text"
+      id="loadingText"
+    >
+      Opening Kitchen...
+    </div>
+
+  </div>
+
+
+  <!-- ===========================
+       HEADER
+  ============================ -->
+
+  <header class="header">
+
+    <div class="header-inner">
+
+      <div class="header-icon">
+        🍽️
+      </div>
+
+      <h1>
+        Oktoberfest Kitchen
+      </h1>
+
+      <p>
+        QR Ticket Scanner
+        <br>
+        Durhan White Beach Resort
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <!-- ===========================
+       MAIN
+  ============================ -->
+
+  <main class="container">
+
+
+    <!-- =========================
+         QR SCANNER
+    ========================== -->
+
+    <section class="card">
+
+      <div class="card-title">
+        📷 Scan Ticket QR
+      </div>
+
+      <p class="description">
+        Scan the QR code printed on the guest's
+        Oktoberfest ticket. Scanning does not consume
+        a claim. The Kitchen dashboard will open after
+        the ticket is scanned.
+      </p>
+
+
+      <div
+        class="status"
+        id="cameraStatus"
+      >
+        Checking camera...
+      </div>
+
+
+      <!-- CAMERA SELECTION -->
+
+      <div
+        class="camera-select"
+        id="cameraSelectContainer"
+      >
+
+        <label for="cameraSelect">
+          Select Camera
+        </label>
+
+        <select id="cameraSelect"></select>
+
+      </div>
+
+
+      <!-- START -->
+
+      <button
+        class="button button-primary"
+        id="startButton"
+        onclick="startScanner()"
+      >
+        📷 START QR SCANNER
+      </button>
+
+
+      <!-- STOP -->
+
+      <button
+        class="button button-danger"
+        id="stopButton"
+        onclick="stopScanner()"
+      >
+        ■ STOP CAMERA
+      </button>
+
+
+      <!-- CAMERA -->
+
+      <div id="readerContainer">
+
+        <div id="reader"></div>
+
+        <div class="scanner-help">
+          Hold the ticket QR code inside the camera view.
+          The ticket will open automatically when detected.
+        </div>
+
+      </div>
+
+
+      <!-- LAST SCAN -->
+
+      <div
+        class="last-scan"
+        id="lastScan"
+      >
+
+        <div class="last-scan-title">
+          QR Detected
+        </div>
+
+        <div
+          class="last-scan-value"
+          id="lastScanValue"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         MANUAL FALLBACK
+    ========================== -->
+
+    <section class="card">
+
+      <div class="card-title">
+        🔎 Manual Ticket Search
+      </div>
+
+      <p class="description">
+        If the QR cannot be scanned, enter the ticket
+        number manually.
+      </p>
+
+
+      <div class="manual-row">
+
+        <input
+          type="text"
+          id="manualControl"
+          placeholder="OF0001"
+          maxlength="6"
+          autocomplete="off"
+          onkeydown="manualKeyDown(event)"
+        >
+
+
+        <button
+          class="manual-button"
+          onclick="openManualTicket()"
+        >
+          SEARCH
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         DIRECT KITCHEN
+    ========================== -->
+
+    <section class="card">
+
+      <div class="card-title">
+        🍽️ Kitchen Dashboard
+      </div>
+
+      <p class="description">
+        Open the Kitchen dashboard without scanning a ticket.
+        You can still search for a ticket manually there.
+      </p>
+
+
+      <button
+        class="button button-green"
+        onclick="openKitchenDashboard()"
+      >
+        OPEN KITCHEN DASHBOARD
+      </button>
+
+    </section>
+
+
+  </main>
+
+
+  <div class="footer">
+    Oktoberfest – Grilled by the Beach
+    <br>
+    Durhan White Beach Resort
+  </div>
+
+
+<script>
+
+/***************************************************************
+ * DURHAN WHITE BEACH RESORT
+ * OKTOBERFEST EXTERNAL QR SCANNER
+ ***************************************************************/
+
+
+/***************************************************************
+ * YOUR APPS SCRIPT WEB APP
+ *
+ * ALREADY CONFIGURED
+ ***************************************************************/
+
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbysRgrKltKm_1mbZLrhvkeOT31VMbru66SgqnwwQpJigLUJTaLbvSC1P2iShKm79JDV/exec";
+
+
+/***************************************************************
+ * GLOBAL VARIABLES
+ ***************************************************************/
+
+let html5QrCode = null;
+
+let scannerRunning = false;
+
+let scanLocked = false;
+
+let cameras = [];
+
+let temporaryStream = null;
+
+
+/***************************************************************
+ * PAGE START
+ ***************************************************************/
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+
+    checkCameraSupport();
+
+  }
+);
+
+
+/***************************************************************
+ * CHECK CAMERA SUPPORT
+ ***************************************************************/
+
+function checkCameraSupport() {
+
+  if (!window.isSecureContext) {
+
+    setStatus(
+      "Camera requires HTTPS. Make sure this scanner page is opened using https://",
+      "error"
+    );
+
+    disableStart();
+
+    return false;
+
+  }
+
+
+  if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia
+  ) {
+
+    setStatus(
+      "This browser does not support camera access.",
+      "error"
+    );
+
+    disableStart();
+
+    return false;
+
+  }
+
+
+  if (
+    typeof Html5Qrcode === "undefined"
+  ) {
+
+    setStatus(
+      "QR scanner library failed to load. Check your internet connection and refresh the page.",
+      "error"
+    );
+
+    disableStart();
+
+    return false;
+
+  }
+
+
+  setStatus(
+    "Camera ready. Press START QR SCANNER.",
+    "success"
+  );
+
+
+  return true;
+
+}
+
+
+/***************************************************************
+ * START SCANNER
+ ***************************************************************/
+
+async function startScanner() {
+
+  if (!checkCameraSupport()) {
+    return;
+  }
+
+
+  if (scannerRunning) {
+    return;
+  }
+
+
+  scanLocked = false;
+
+
+  const startButton =
+    document.getElementById(
+      "startButton"
+    );
+
+
+  startButton.disabled = true;
+
+  startButton.textContent =
+    "REQUESTING CAMERA...";
+
+
+  setStatus(
+    "Requesting camera permission...",
+    ""
+  );
+
+
+  try {
+
+    /***********************************************************
+     * REQUEST CAMERA PERMISSION
+     ***********************************************************/
+
+    temporaryStream =
+      await navigator.mediaDevices
+        .getUserMedia({
+          video: {
+            facingMode: {
+              ideal: "environment"
+            }
+          },
+          audio: false
+        });
+
+
+    setStatus(
+      "Camera permission granted.",
+      "success"
+    );
+
+
+    /***********************************************************
+     * FIND CAMERAS
+     ***********************************************************/
+
+    const devices =
+      await navigator.mediaDevices
+        .enumerateDevices();
+
+
+    cameras =
+      devices.filter(
+        device =>
+          device.kind === "videoinput"
+      );
+
+
+    stopTemporaryStream();
+
+
+    if (cameras.length === 0) {
+
+      throw new Error(
+        "No camera was detected."
+      );
+
+    }
+
+
+    populateCameraList();
+
+
+    await startSelectedCamera();
+
+
+  } catch (error) {
+
+    stopTemporaryStream();
+
+
+    startButton.disabled = false;
+
+    startButton.textContent =
+      "📷 START QR SCANNER";
+
+
+    handleCameraError(
+      error
+    );
+
+  }
+
+}
+
+
+/***************************************************************
+ * CAMERA LIST
+ ***************************************************************/
+
+function populateCameraList() {
+
+  const select =
+    document.getElementById(
+      "cameraSelect"
+    );
+
+
+  select.innerHTML = "";
+
+
+  let preferredIndex = 0;
+
+
+  cameras.forEach(
+    function (camera, index) {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        camera.deviceId;
+
+
+      option.textContent =
+        camera.label ||
+        (
+          "Camera " +
+          (index + 1)
+        );
+
+
+      select.appendChild(
+        option
+      );
+
+
+      const label =
+        String(
+          camera.label || ""
+        )
+          .toLowerCase();
+
+
+      if (
+        label.includes("back") ||
+        label.includes("rear") ||
+        label.includes("environment")
+      ) {
+
+        preferredIndex =
+          index;
+
+      }
+
+    }
+  );
+
+
+  select.selectedIndex =
+    preferredIndex;
+
+
+  document
+    .getElementById(
+      "cameraSelectContainer"
+    )
+    .style.display =
+      cameras.length > 1
+        ? "block"
+        : "none";
+
+
+  select.onchange =
+    async function () {
+
+      if (scannerRunning) {
+
+        await stopScanner(false);
+
+        await startSelectedCamera();
+
+      }
+
+    };
+
+}
+
+
+/***************************************************************
+ * START SELECTED CAMERA
+ ***************************************************************/
+
+async function startSelectedCamera() {
+
+  const select =
+    document.getElementById(
+      "cameraSelect"
+    );
+
+
+  const cameraId =
+    select.value;
+
+
+  if (!cameraId) {
+
+    throw new Error(
+      "No camera selected."
+    );
+
+  }
+
+
+  /*************************************************************
+   * CLEAN OLD SCANNER
+   *************************************************************/
+
+  if (html5QrCode) {
+
+    try {
+
+      if (scannerRunning) {
+
+        await html5QrCode.stop();
+
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+
+    try {
+
+      html5QrCode.clear();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  }
+
+
+  document
+    .getElementById(
+      "readerContainer"
+    )
+    .style.display =
+      "block";
+
+
+  html5QrCode =
+    new Html5Qrcode(
+      "reader"
+    );
+
+
+  try {
+
+    await html5QrCode.start(
+
+      cameraId,
+
+      {
+        fps: 10,
+
+        qrbox:
+          function (
+            viewfinderWidth,
+            viewfinderHeight
+          ) {
+
+            const minimum =
+              Math.min(
+                viewfinderWidth,
+                viewfinderHeight
+              );
+
+
+            const size =
+              Math.floor(
+                minimum * 0.72
+              );
+
+
+            return {
+              width: size,
+              height: size
+            };
+
+          },
+
+        aspectRatio: 1.0
+      },
+
+      onQrSuccess,
+
+      function () {
+        // Ignore scan misses.
+      }
+
+    );
+
+
+    scannerRunning = true;
+
+
+    document
+      .getElementById(
+        "startButton"
+      )
+      .disabled =
+        true;
+
+
+    document
+      .getElementById(
+        "startButton"
+      )
+      .textContent =
+        "📷 SCANNER RUNNING";
+
+
+    document
+      .getElementById(
+        "stopButton"
+      )
+      .style.display =
+        "block";
+
+
+    setStatus(
+      "Scanner active. Point the camera at the ticket QR.",
+      "success"
+    );
+
+
+  } catch (error) {
+
+    scannerRunning = false;
+
+
+    document
+      .getElementById(
+        "readerContainer"
+      )
+      .style.display =
+        "none";
+
+
+    document
+      .getElementById(
+        "startButton"
+      )
+      .disabled =
+        false;
+
+
+    document
+      .getElementById(
+        "startButton"
+      )
+      .textContent =
+        "📷 START QR SCANNER";
+
+
+    handleCameraError(
+      error
+    );
+
+  }
+
+}
+
+
+/***************************************************************
+ * QR SUCCESS
+ ***************************************************************/
+
+async function onQrSuccess(
+  decodedText
+) {
+
+  if (scanLocked) {
+    return;
+  }
+
+
+  const qrPayload =
+    String(
+      decodedText || ""
+    ).trim();
+
+
+  if (!qrPayload) {
+    return;
+  }
+
+
+  /*************************************************************
+   * BASIC CHECK
+   *
+   * Actual security verification still happens in Apps Script.
+   *************************************************************/
+
+  if (
+    !qrPayload.startsWith(
+      "DWBR-OKTOBERFEST|"
+    )
+  ) {
+
+    scanLocked = true;
+
+
+    setStatus(
+      "This is not a valid Durhan Oktoberfest ticket QR.",
+      "error"
+    );
+
+
+    setTimeout(
+      function () {
+
+        scanLocked = false;
+
+      },
+      2000
+    );
+
+
+    return;
+
+  }
+
+
+  scanLocked = true;
+
+
+  /*************************************************************
+   * DISPLAY DETECTED QR
+   *************************************************************/
+
+  document
+    .getElementById(
+      "lastScan"
+    )
+    .style.display =
+      "block";
+
+
+  const parts =
+    qrPayload.split("|");
+
+
+  document
+    .getElementById(
+      "lastScanValue"
+    )
+    .textContent =
+      parts.length >= 2
+        ? parts[1]
+        : "Ticket detected";
+
+
+  setStatus(
+    "Ticket QR detected. Opening Kitchen...",
+    "success"
+  );
+
+
+  /*************************************************************
+   * STOP CAMERA
+   *************************************************************/
+
+  await stopScanner(false);
+
+
+  /*************************************************************
+   * OPEN APPS SCRIPT KITCHEN
+   *
+   * IMPORTANT:
+   * QR is NOT consumed here.
+   *
+   * Apps Script receives:
+   *
+   * ?page=kitchen&qr=SECURE_PAYLOAD
+   *************************************************************/
+
+  showLoading(
+    "QR detected. Opening ticket..."
+  );
+
+
+  const destination =
+    WEB_APP_URL +
+    "?page=kitchen&qr=" +
+    encodeURIComponent(
+      qrPayload
+    );
+
+
+  /*************************************************************
+   * REPLACE PAGE
+   *
+   * This avoids leaving multiple scanner pages
+   * in the phone's browser history.
+   *************************************************************/
+
+  window.location.replace(
+    destination
+  );
+
+}
+
+
+/***************************************************************
+ * STOP SCANNER
+ ***************************************************************/
+
+async function stopScanner(
+  updateStatus = true
+) {
+
+  try {
+
+    if (
+      html5QrCode &&
+      scannerRunning
+    ) {
+
+      await html5QrCode.stop();
+
+    }
+
+  } catch (error) {
+
+    console.log(
+      "Scanner stop:",
+      error
+    );
+
+  }
+
+
+  try {
+
+    if (html5QrCode) {
+
+      html5QrCode.clear();
+
+    }
+
+  } catch (error) {
+
+    console.log(
+      "Scanner clear:",
+      error
+    );
+
+  }
+
+
+  scannerRunning = false;
+
+
+  document
+    .getElementById(
+      "readerContainer"
+    )
+    .style.display =
+      "none";
+
+
+  document
+    .getElementById(
+      "stopButton"
+    )
+    .style.display =
+      "none";
+
+
+  const startButton =
+    document.getElementById(
+      "startButton"
+    );
+
+
+  startButton.disabled = false;
+
+  startButton.textContent =
+    "📷 START QR SCANNER";
+
+
+  if (updateStatus) {
+
+    setStatus(
+      "Camera stopped. Press START QR SCANNER to scan again.",
+      ""
+    );
+
+  }
+
+}
+
+
+/***************************************************************
+ * STOP TEMPORARY STREAM
+ ***************************************************************/
+
+function stopTemporaryStream() {
+
+  if (!temporaryStream) {
+    return;
+  }
+
+
+  try {
+
+    temporaryStream
+      .getTracks()
+      .forEach(
+        function (track) {
+
+          track.stop();
+
+        }
+      );
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+
+  temporaryStream = null;
+
+}
+
+
+/***************************************************************
+ * CAMERA ERROR
+ ***************************************************************/
+
+function handleCameraError(
+  error
+) {
+
+  console.error(
+    error
+  );
+
+
+  const errorName =
+    error && error.name
+      ? error.name
+      : "";
+
+
+  const errorMessage =
+    error && error.message
+      ? error.message
+      : String(error);
+
+
+  if (
+    errorName === "NotAllowedError" ||
+    errorMessage
+      .toLowerCase()
+      .includes(
+        "permission"
+      )
+  ) {
+
+    setStatus(
+      "Camera permission was denied. Allow camera permission for this website, then press START QR SCANNER again.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (
+    errorName === "NotFoundError"
+  ) {
+
+    setStatus(
+      "No camera was found on this device.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (
+    errorName === "NotReadableError"
+  ) {
+
+    setStatus(
+      "The camera is being used by another app. Close the other camera app and try again.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (
+    errorName === "OverconstrainedError"
+  ) {
+
+    setStatus(
+      "The selected camera cannot be used. Try another camera.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  setStatus(
+    "Camera error: " +
+    errorMessage,
+    "error"
+  );
+
+}
+
+
+/***************************************************************
+ * STATUS
+ ***************************************************************/
+
+function setStatus(
+  message,
+  type
+) {
+
+  const status =
+    document.getElementById(
+      "cameraStatus"
+    );
+
+
+  status.textContent =
+    message;
+
+
+  status.className =
+    "status";
+
+
+  if (type) {
+
+    status.classList.add(
+      type
+    );
+
+  }
+
+}
+
+
+/***************************************************************
+ * DISABLE CAMERA
+ ***************************************************************/
+
+function disableStart() {
+
+  document
+    .getElementById(
+      "startButton"
+    )
+    .disabled =
+      true;
+
+}
+
+
+/***************************************************************
+ * LOADING
+ ***************************************************************/
+
+function showLoading(
+  message
+) {
+
+  document
+    .getElementById(
+      "loadingText"
+    )
+    .textContent =
+      message ||
+      "Opening Kitchen...";
+
+
+  document
+    .getElementById(
+      "loading"
+    )
+    .classList.add(
+      "show"
+    );
+
+}
+
+
+/***************************************************************
+ * MANUAL ENTER
+ ***************************************************************/
+
+function manualKeyDown(
+  event
+) {
+
+  if (
+    event.key === "Enter"
+  ) {
+
+    openManualTicket();
+
+  }
+
+}
+
+
+/***************************************************************
+ * MANUAL TICKET
+ ***************************************************************/
+
+function openManualTicket() {
+
+  let control =
+    document
+      .getElementById(
+        "manualControl"
+      )
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  if (!control) {
+
+    alert(
+      "Enter the ticket control number."
+    );
+
+    return;
+
+  }
+
+
+  /*************************************************************
+   * ALLOW:
+   *
+   * 1
+   * 0001
+   * OF1
+   * OF0001
+   *************************************************************/
+
+  control =
+    control.replace(
+      /\s+/g,
+      ""
+    );
+
+
+  if (
+    control.startsWith(
+      "OF"
+    )
+  ) {
+
+    control =
+      control.substring(2);
+
+  }
+
+
+  control =
+    control.replace(
+      /[^0-9]/g,
+      ""
+    );
+
+
+  const number =
+    parseInt(
+      control,
+      10
+    );
+
+
+  if (
+    !number ||
+    number < 1 ||
+    number > 80
+  ) {
+
+    alert(
+      "Ticket must be between OF0001 and OF0080."
+    );
+
+    return;
+
+  }
+
+
+  const normalized =
+    "OF" +
+    String(number).padStart(
+      4,
+      "0"
+    );
+
+
+  showLoading(
+    "Opening " +
+    normalized +
+    "..."
+  );
+
+
+  /*************************************************************
+   * MANUAL SEARCH PARAMETER
+   *************************************************************/
+
+  const destination =
+    WEB_APP_URL +
+    "?page=kitchen&control=" +
+    encodeURIComponent(
+      normalized
+    );
+
+
+  window.location.replace(
+    destination
+  );
+
+}
+
+
+/***************************************************************
+ * OPEN KITCHEN DASHBOARD
+ ***************************************************************/
+
+function openKitchenDashboard() {
+
+  showLoading(
+    "Opening Kitchen dashboard..."
+  );
+
+
+  window.location.href =
+    WEB_APP_URL +
+    "?page=kitchen";
+
+}
+
+
+/***************************************************************
+ * CLEAN UP CAMERA
+ ***************************************************************/
+
+window.addEventListener(
+  "beforeunload",
+  function () {
+
+    stopTemporaryStream();
+
+
+    if (
+      html5QrCode &&
+      scannerRunning
+    ) {
+
+      try {
+
+        html5QrCode.stop();
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    }
+
+  }
+);
+
+</script>
+
+</body>
+</html>
